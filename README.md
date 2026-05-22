@@ -4,7 +4,7 @@
 [![React Native](https://img.shields.io/badge/React_Native-0.73+-blue.svg)](https://reactnative.dev/)
 [![Expo](https://img.shields.io/badge/Expo-SDK_50+-black.svg)](https://expo.dev/)
 
-O **TrecoDex Mobile** é o aplicativo móvel oficial do ecossistema **TrecoDex** (a "Pokédex da vida real" para organização e catalogação de pertences domésticos). Desenvolvido com foco em acessibilidade e neuro-inclusão, o aplicativo ajuda pessoas com TDAH, Autismo ou dificuldades de memória espacial a organizarem suas casas de forma autônoma, leve e divertida.
+O **TrecoDex Mobile** é o aplicativo móvel oficial do ecossistema **TrecoDex** (a "Pokédex da vida real" para organização e catalogação de pertences domésticos). Desenvolvido com foco em acessibilidade e neuro-inclusão, o aplicativo trabalha integrado ao backend inteligente do [TrecoDex API](https://github.com/guilhermepadilha/treco-dex-api) para ajudar pessoas com TDAH, Autismo ou dificuldades de memória espacial a organizarem suas casas de forma autônoma, leve e divertida.
 
 ---
 

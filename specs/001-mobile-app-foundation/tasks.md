@@ -21,7 +21,7 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize React Native Expo project structure at `/home/guilherme.padilha/projetos/treco-dex-mobile` using typescript template
+- [X] T001 Initialize React Native Expo project structure at `/home/guilherme.padilha/projetos/treco-dex-mobile` using typescript template
 - [ ] T002 Configure core dependencies in `/home/guilherme.padilha/projetos/treco-dex-mobile/package.json` (`expo-router`, `zustand`, `@tanstack/react-query`, `react-native-mmkv`, `react-native-reanimated`, `moti`, `@shopify/react-native-skia`)
 - [ ] T003 [P] Configure TypeScript compiler options in `/tsconfig.json` and strict ESLint/Prettier configuration in `/.eslintrc.js`
 

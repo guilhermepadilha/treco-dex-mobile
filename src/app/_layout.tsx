@@ -71,7 +71,7 @@ class GlobalErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
       );
     }
 
-    return this.children;
+    return this.props.children;
   }
 }
 
@@ -97,7 +97,7 @@ function InitialLayout() {
     const inAuthGroup = segments[0] === '(auth)';
 
     if (isAuthenticated) {
-      if (inAuthGroup || segments.length === 0 || segments[0] === 'index' || segments[0] === '') {
+      if (inAuthGroup || !segments[0] || segments[0] === 'index' || segments[0] === '') {
         router.replace('/(tabs)');
       }
     } else {

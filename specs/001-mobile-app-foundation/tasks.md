@@ -54,8 +54,8 @@
 
 - [x] T010 [P] [US1] Create the secure login screen wireframe layout (inputs and submit button) in `/src/app/(auth)/login.tsx`
 - [x] T011 [US1] Implement user login form handler and integrate with useAuthStore and API login endpoint in `/src/app/(auth)/login.tsx`
-- [ ] T012 [P] [US1] Create the register screen wireframe layout in `/src/app/(auth)/register.tsx`
-- [ ] T013 [US1] Implement registration form handler and API registration integration in `/src/app/(auth)/register.tsx`
+- [x] T012 [P] [US1] Create the register screen wireframe layout in `/src/app/(auth)/register.tsx`
+- [x] T013 [US1] Implement registration form handler and API registration integration in `/src/app/(auth)/register.tsx`
 - [ ] T014 [US1] Implement automated local session recovery (JWT check from MMKV storage) on app startup in `/src/app/_layout.tsx`
 
 **Checkpoint**: At this point, User Story 1 is fully functional and testable independently.

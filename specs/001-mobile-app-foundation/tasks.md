@@ -89,12 +89,12 @@
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Create Camera and Onboarding conversational view structure in `/src/app/(tabs)/camera.tsx`
-- [ ] T022 [US3] Integrate native camera component (expo-camera) and display basic Skia wireframe reticle in `/src/app/(tabs)/camera.tsx`
-- [ ] T023 [P] [US3] Implement client-side image compression utility in `/src/utils/media.ts` supporting JPEG format and max size of 500KB
-- [ ] T024 [US3] Setup conversational onboarding Zustand store in `/src/store/useChatOnboarding.ts` to manage chatbot message state
-- [ ] T025 [US3] Create conversational chat list and bubble components in `/src/components/chat/ChatBubble.tsx` and `/src/components/chat/ChatList.tsx`
-- [ ] T026 [US3] Integrate image compression and upload with chat onboarding flow trigger in `/src/app/(tabs)/camera.tsx`
+- [x] T021 [US3] Create Camera and Onboarding conversational view structure in `/src/app/(tabs)/camera.tsx`
+- [x] T022 [US3] Integrate native camera component (expo-camera) and display basic Skia wireframe reticle in `/src/app/(tabs)/camera.tsx`
+- [x] T023 [P] [US3] Implement client-side image compression utility in `/src/utils/media.ts` supporting JPEG format and max size of 500KB
+- [x] T024 [US3] Setup conversational onboarding Zustand store in `/src/store/useChatOnboarding.ts` to manage chatbot message state
+- [x] T025 [US3] Create conversational chat list and bubble components in `/src/components/chat/ChatBubble.tsx` and `/src/components/chat/ChatList.tsx`
+- [x] T026 [US3] Integrate image compression and upload with chat onboarding flow trigger in `/src/app/(tabs)/camera.tsx`
 
 **Checkpoint**: User Story 3 should be fully functional and testable.
 

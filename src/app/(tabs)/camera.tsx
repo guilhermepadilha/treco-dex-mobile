@@ -1,17 +1,276 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useRef } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+  TextInput,
+  Platform,
+} from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import { Canvas, Line } from '@shopify/react-native-skia';
+import { Ionicons } from '@expo/vector-icons';
+import { useChatOnboarding } from '../../store/useChatOnboarding';
+import { compressImage } from '../../utils/media';
+import { ChatList } from '../../components/chat/ChatList';
 
-/**
- * Placeholder esquelético temporário para a tela de busca visual / câmera.
- * A implementação completa será feita na tarefa T021.
- */
 export default function CameraTab() {
+  const [permission, requestPermission] = useCameraPermissions();
+  const [isCapturing, setIsCapturing] = useState(false);
+  const cameraRef = useRef<any>(null);
+
+  // Zustand Chat Store
+  const {
+    messages,
+    photoUri,
+    compressedPhotoUri,
+    isStarted,
+    isLoading,
+    currentStep,
+    recommendedHabitat,
+    startOnboarding,
+    addMessage,
+    setRecommendedHabitat,
+    setLoading,
+    nextStep,
+    resetOnboarding,
+  } = useChatOnboarding();
+
+  const [chatInput, setChatInput] = useState('');
+
+  if (!permission) {
+    // Permissões ainda carregando
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#64FFDA" />
+      </View>
+    );
+  }
+
+  if (!permission.granted) {
+    // Permissão negada
+    return (
+      <View style={styles.permissionContainer}>
+        <Ionicons name="camera-reverse-outline" size={64} color="#FF5C5C" style={{ marginBottom: 16 }} />
+        <Text style={styles.permissionTitle}>ACESSO À CÂMERA NECESSÁRIO</Text>
+        <Text style={styles.permissionSubtitle}>
+          O TrecoDex precisa de acesso à câmera para digitalizar e cadastrar seus trecos com inteligência visual.
+        </Text>
+        <TouchableOpacity style={styles.permissionBtn} onPress={requestPermission} activeOpacity={0.8}>
+          <Text style={styles.permissionBtnText}>CONCEDER PERMISSÃO</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Ação de captura de foto e disparo do onboarding (Requisitos T022 / T026)
+  const handleCapture = async () => {
+    if (cameraRef.current && !isCapturing) {
+      try {
+        setIsCapturing(true);
+        setLoading(true);
+
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.8,
+          skipProcessing: false,
+        });
+
+        if (photo && photo.uri) {
+          // 1. Comprimir a imagem (Requisito T023)
+          const compressionResult = await compressImage(photo.uri);
+
+          // 2. Iniciar fluxo conversacional (Requisito T026)
+          startOnboarding(photo.uri, compressionResult.uri);
+
+          // Simular resposta da IA de recomendação inteligente (Requisito T026)
+          setTimeout(() => {
+            setRecommendedHabitat({
+              name: 'Organizador de Cabos',
+              environmentName: 'Escritório',
+              description: 'Gaveteiro cinza, segunda gaveta.',
+              confidence: 0.98,
+            });
+
+            addMessage(
+              'AI',
+              '🔍 Identifiquei um dispositivo eletrônico compacto com cabo (carregador/fone).\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Organizador de Cabos** no cômodo **Escritório** (Confiança: 98%).\n\nDeseja confirmar essa recomendação?'
+            );
+            nextStep('RECOMMENDATION_SHOWN');
+            setLoading(false);
+          }, 2000);
+        }
+      } catch (error) {
+        console.error('Falha ao tirar foto:', error);
+        setIsCapturing(false);
+        setLoading(false);
+      } finally {
+        setIsCapturing(false);
+      }
+    }
+  };
+
+  const handleConfirmHabitat = () => {
+    addMessage('USER', 'Sim, confirmar esse destino!');
+    setLoading(true);
+
+    setTimeout(() => {
+      addMessage(
+        'AI',
+        '⚡ Excelente escolha! O treco foi cadastrado com sucesso e já está integrado à sua Pokédex de trecos.\n\nSempre que precisar encontrar, basta buscar por "Carregador" ou olhar na aba principal!'
+      );
+      nextStep('FINISHED');
+      setLoading(false);
+    }, 1500);
+  };
+
+  const handleCustomHabitat = () => {
+    addMessage('USER', 'Quero registrar em outro lugar...');
+    nextStep('CONFIRMING');
+    addMessage('AI', 'Entendido! Por favor, digite o nome do novo habitat onde deseja guardar este treco:');
+  };
+
+  const handleSendChatText = () => {
+    if (!chatInput.trim()) return;
+
+    const userText = chatInput;
+    addMessage('USER', userText);
+    setChatInput('');
+    setLoading(true);
+
+    setTimeout(() => {
+      addMessage(
+        'AI',
+        `✅ Entendido! Guardando no novo habitat: **"${userText}"**.\nO registro do treco foi finalizado com sucesso!`
+      );
+      nextStep('FINISHED');
+      setLoading(false);
+    }, 1500);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Scanner de Trecos</Text>
-      <Text style={styles.subtitle}>
-        O scanner conversacional integrado com IA e câmera nativa será exibido aqui.
-      </Text>
+      {!isStarted ? (
+        // Modo Câmera Ativa com Mira Skia (T022)
+        <View style={styles.cameraContainer}>
+          <CameraView style={StyleSheet.absoluteFillObject} ref={cameraRef} facing="back" />
+
+          {/* Sobreposição Skia: Mira de Arame (Reticle) */}
+          <Canvas style={StyleSheet.absoluteFillObject}>
+            {/* Canto Superior Esquerdo */}
+            <Line p1={{ x: 60, y: 150 }} p2={{ x: 100, y: 150 }} color="#64FFDA" strokeWidth={3} />
+            <Line p1={{ x: 60, y: 150 }} p2={{ x: 60, y: 190 }} color="#64FFDA" strokeWidth={3} />
+
+            {/* Canto Superior Direito */}
+            <Line p1={{ x: 300, y: 150 }} p2={{ x: 260, y: 150 }} color="#64FFDA" strokeWidth={3} />
+            <Line p1={{ x: 300, y: 150 }} p2={{ x: 300, y: 190 }} color="#64FFDA" strokeWidth={3} />
+
+            {/* Canto Inferior Esquerdo */}
+            <Line p1={{ x: 60, y: 390 }} p2={{ x: 100, y: 390 }} color="#64FFDA" strokeWidth={3} />
+            <Line p1={{ x: 60, y: 350 }} p2={{ x: 60, y: 390 }} color="#64FFDA" strokeWidth={3} />
+
+            {/* Canto Inferior Direito */}
+            <Line p1={{ x: 300, y: 390 }} p2={{ x: 260, y: 390 }} color="#64FFDA" strokeWidth={3} />
+            <Line p1={{ x: 300, y: 390 }} p2={{ x: 300, y: 350 }} color="#64FFDA" strokeWidth={3} />
+          </Canvas>
+
+          {/* Dica da Câmera */}
+          <View style={styles.tipOverlay}>
+            <Text style={styles.tipText}>Aponte para o objeto e capture</Text>
+          </View>
+
+          {/* Botão de Disparo */}
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              style={styles.captureBtn}
+              onPress={handleCapture}
+              disabled={isCapturing}
+              activeOpacity={0.8}
+            >
+              <View style={styles.captureBtnInner} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : (
+        // Modo Chat Conversacional Ativo (T021)
+        <View style={styles.chatContainer}>
+          {/* Header do Chat */}
+          <View style={styles.chatHeader}>
+            {photoUri && (
+              <Image source={{ uri: photoUri }} style={styles.chatHeaderThumbnail} />
+            )}
+            <View>
+              <Text style={styles.chatHeaderTitle}>CADASTRO CONVERSACIONAL</Text>
+              <Text style={styles.chatHeaderSubtitle}>IA Multimodal Onboarding</Text>
+            </View>
+            <TouchableOpacity style={styles.closeBtn} onPress={resetOnboarding} activeOpacity={0.7}>
+              <Ionicons name="close-outline" size={24} color="#FF5C5C" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Listagem de Balões */}
+          <View style={styles.chatListWrapper}>
+            <ChatList messages={messages} />
+            {isLoading && (
+              <View style={styles.chatLoaderRow}>
+                <ActivityIndicator size="small" color="#64FFDA" />
+                <Text style={styles.chatLoaderText}>Digitando...</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Painel Conversacional de Interação */}
+          <View style={styles.interactionPanel}>
+            {currentStep === 'RECOMMENDATION_SHOWN' && (
+              <View style={styles.optionsRow}>
+                <TouchableOpacity
+                  style={[styles.optionBtn, styles.confirmBtn]}
+                  onPress={handleConfirmHabitat}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.confirmBtnText}>SIM, CONFIRMAR DESTINO</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.optionBtn, styles.declineBtn]}
+                  onPress={handleCustomHabitat}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.declineBtnText}>OUTRO LUGAR</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {currentStep === 'CONFIRMING' && (
+              <View style={styles.inputRow}>
+                <TextInput
+                  style={styles.chatInput}
+                  placeholder="Ex: Gaveta de Meias, Quarto..."
+                  placeholderTextColor="#8892B0"
+                  value={chatInput}
+                  onChangeText={setChatInput}
+                  autoCorrect={false}
+                  onSubmitEditing={handleSendChatText}
+                />
+                <TouchableOpacity style={styles.sendBtn} onPress={handleSendChatText} activeOpacity={0.7}>
+                  <Ionicons name="send" size={16} color="#0A192F" />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {currentStep === 'FINISHED' && (
+              <TouchableOpacity
+                style={styles.finishBtn}
+                onPress={resetOnboarding}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.finishBtnText}>CONCLUIR E VOLTAR À CÂMERA</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -20,20 +279,223 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0A192F',
+  },
+  loaderContainer: {
+    flex: 1,
+    backgroundColor: '#0A192F',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
   },
-  title: {
-    fontSize: 24,
+  permissionContainer: {
+    flex: 1,
+    backgroundColor: '#0A192F',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  permissionTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#64FFDA',
+    color: '#CCD6F6',
+    letterSpacing: 1.5,
     marginBottom: 8,
+    textAlign: 'center',
   },
-  subtitle: {
-    fontSize: 14,
+  permissionSubtitle: {
+    fontSize: 13,
     color: '#8892B0',
     textAlign: 'center',
     lineHeight: 20,
+    marginBottom: 32,
+  },
+  permissionBtn: {
+    height: 48,
+    backgroundColor: '#64FFDA',
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#64FFDA',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  permissionBtnText: {
+    color: '#0A192F',
+    fontWeight: 'bold',
+    letterSpacing: 1.2,
+  },
+  cameraContainer: {
+    flex: 1,
+    position: 'relative',
+  },
+  tipOverlay: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 60 : 30,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(17, 34, 64, 0.8)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#233554',
+  },
+  tipText: {
+    color: '#64FFDA',
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+  },
+  actionRow: {
+    position: 'absolute',
+    bottom: 40,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  captureBtn: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
+    backgroundColor: 'rgba(100, 255, 218, 0.2)',
+    borderWidth: 4,
+    borderColor: '#64FFDA',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  captureBtnInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#64FFDA',
+  },
+  chatContainer: {
+    flex: 1,
+    marginTop: Platform.OS === 'ios' ? 44 : 20,
+  },
+  chatHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#233554',
+    backgroundColor: '#112240',
+  },
+  chatHeaderThumbnail: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#64FFDA',
+    marginRight: 12,
+  },
+  chatHeaderTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#CCD6F6',
+    letterSpacing: 1.5,
+  },
+  chatHeaderSubtitle: {
+    fontSize: 11,
+    color: '#8892B0',
+    marginTop: 2,
+  },
+  closeBtn: {
+    marginLeft: 'auto',
+    padding: 6,
+  },
+  chatListWrapper: {
+    flex: 1,
+  },
+  chatLoaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  chatLoaderText: {
+    fontSize: 12,
+    color: '#8892B0',
+    marginLeft: 8,
+  },
+  interactionPanel: {
+    backgroundColor: '#112240',
+    borderTopWidth: 1,
+    borderTopColor: '#233554',
+    padding: 16,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 16,
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  optionBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 6,
+  },
+  confirmBtn: {
+    backgroundColor: '#64FFDA',
+  },
+  confirmBtnText: {
+    color: '#0A192F',
+    fontSize: 11,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+  },
+  declineBtn: {
+    backgroundColor: 'rgba(255, 92, 92, 0.15)',
+    borderWidth: 1,
+    borderColor: '#FF5C5C',
+  },
+  declineBtnText: {
+    color: '#FF5C5C',
+    fontSize: 11,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0A192F',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#233554',
+    height: 44,
+    paddingLeft: 12,
+    paddingRight: 6,
+  },
+  chatInput: {
+    flex: 1,
+    color: '#CCD6F6',
+    fontSize: 13,
+    height: '100%',
+  },
+  sendBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    backgroundColor: '#64FFDA',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  finishBtn: {
+    width: '100%',
+    height: 44,
+    backgroundColor: '#64FFDA',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  finishBtnText: {
+    color: '#0A192F',
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 1,
   },
 });

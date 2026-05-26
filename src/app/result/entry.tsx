@@ -33,7 +33,10 @@ export default function VisualSearchResultEntry() {
     <View style={styles.container}>
       {/* Cabeçalho */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => router.replace('/(tabs)/camera')}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => router.replace('/(tabs)/camera')}
+        >
           <Ionicons name="close-outline" size={26} color="#64FFDA" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>TRECO-DEX ENTRY</Text>
@@ -70,7 +73,8 @@ export default function VisualSearchResultEntry() {
           <View style={styles.reasoningCard}>
             <Text style={styles.reasoningHeader}>ANÁLISE DE IA MULTIMODAL</Text>
             <Text style={styles.reasoningText}>
-              {params.reasoning || 'O item corresponde com alto nível de precisão aos metadados geométricos e visuais salvos na Pokédex.'}
+              {params.reasoning ||
+                'O item corresponde com alto nível de precisão aos metadados geométricos e visuais salvos na Pokédex.'}
             </Text>
           </View>
 
@@ -95,7 +99,8 @@ export default function VisualSearchResultEntry() {
 
           <Text style={styles.itemName}>Item Não Catalogado</Text>
           <Text style={styles.unidentifiedSubtitle}>
-            A IA analisou esta foto e não encontrou correspondências exatas em seu TrecoDex. Deseja iniciar o assistente conversacional para cadastrá-lo agora?
+            A IA analisou esta foto e não encontrou correspondências exatas em seu TrecoDex. Deseja
+            iniciar o assistente conversacional para cadastrá-lo agora?
           </Text>
 
           <TouchableOpacity

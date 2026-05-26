@@ -19,9 +19,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
         <Text style={[styles.senderLabel, isAI ? styles.aiLabel : styles.userLabel]}>
           {isAI ? '🤖 TRECO-AI' : '👤 VOCÊ'}
         </Text>
-        <Text style={[styles.text, isAI ? styles.aiText : styles.userText]}>
-          {message.text}
-        </Text>
+        <Text style={[styles.text, isAI ? styles.aiText : styles.userText]}>{message.text}</Text>
       </View>
     </View>
   );

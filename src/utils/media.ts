@@ -18,7 +18,7 @@ export async function compressImage(uri: string): Promise<CompressedImageResult>
     const initialResult = await ImageManipulator.manipulateAsync(
       uri,
       [], // Nenhuma transformação ainda, apenas lê metadados
-      { format: ImageManipulator.SaveFormat.JPEG }
+      { format: ImageManipulator.SaveFormat.JPEG },
     );
 
     // Limites de dimensão ideal para IA de visão computacional (máximo 1200px de largura/altura)
@@ -38,19 +38,15 @@ export async function compressImage(uri: string): Promise<CompressedImageResult>
     }
 
     // 2. Aplicar redimensionamento e alta compressão JPEG (qualidade 0.75)
-    const compressedResult = await ImageManipulator.manipulateAsync(
-      uri,
-      actions,
-      {
-        compress: 0.75, // Ajuste para ficar bem abaixo do teto de 500KB
-        format: ImageManipulator.SaveFormat.JPEG,
-      }
-    );
+    const compressedResult = await ImageManipulator.manipulateAsync(uri, actions, {
+      compress: 0.75, // Ajuste para ficar bem abaixo do teto de 500KB
+      format: ImageManipulator.SaveFormat.JPEG,
+    });
 
     // 3. Simular tamanho em bytes caso a API local não exponha diretamente
     // (Útil para o mock / visualização na UI)
     const estimatedSize = Math.round(
-      (compressedResult.width * compressedResult.height * 0.15) // Fator empírico para JPEG comprimido
+      compressedResult.width * compressedResult.height * 0.15, // Fator empírico para JPEG comprimido
     );
 
     return {

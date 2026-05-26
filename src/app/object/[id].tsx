@@ -74,7 +74,7 @@ const MOCK_OBJECTS_DETAIL = [
     status: 'UNKNOWN',
     primaryHabitatName: 'Bolso Frontal',
     environmentName: 'Mochila de Viagem',
-    habitatDescription: 'Bolso menor com zíper à prova d\'água.',
+    habitatDescription: "Bolso menor com zíper à prova d'água.",
   },
 ];
 
@@ -103,9 +103,9 @@ export default function ObjectDetailScreen() {
       }
     : mockObject;
 
-  const [currentStatus, setCurrentStatus] = useState<
-    'ORGANIZED' | 'MISPLACED' | 'UNKNOWN'
-  >(activeObject?.status as any || 'UNKNOWN');
+  const [currentStatus, setCurrentStatus] = useState<'ORGANIZED' | 'MISPLACED' | 'UNKNOWN'>(
+    (activeObject?.status as any) || 'UNKNOWN',
+  );
 
   if (!activeObject) {
     return (
@@ -131,7 +131,7 @@ export default function ObjectDetailScreen() {
       Alert.alert(
         '💾 Modo Offline',
         'Seu dispositivo está sem conexão. A alteração foi salva localmente e será sincronizada assim que a internet retornar!',
-        [{ text: 'OK', style: 'default' }]
+        [{ text: 'OK', style: 'default' }],
       );
     } else {
       // Se online, simula postagem ou tenta requisitar
@@ -139,11 +139,9 @@ export default function ObjectDetailScreen() {
         await api.post(`/api/objects/${activeObject.id}/states`, {
           state: status,
         });
-        Alert.alert('⚡ Sucesso', 'Estado atualizado no servidor com sucesso!', [
-          { text: 'OK' },
-        ]);
+        Alert.alert('⚡ Sucesso', 'Estado atualizado no servidor com sucesso!', [{ text: 'OK' }]);
         refetch();
-      } catch (error) {
+      } catch {
         // Fallback robusto se a API falhar inesperadamente
         enqueueMutation(`/api/objects/${activeObject.id}/states`, 'POST', {
           state: status,
@@ -151,7 +149,7 @@ export default function ObjectDetailScreen() {
         Alert.alert(
           '💾 Salvo Localmente',
           'Não foi possível contatar o servidor. Alteração enfileirada para sincronização futura.',
-          [{ text: 'OK' }]
+          [{ text: 'OK' }],
         );
       }
     }
@@ -193,9 +191,7 @@ export default function ObjectDetailScreen() {
           <Text style={styles.itemName}>{activeObject.name}</Text>
           <View style={[styles.statusBadge, { backgroundColor: statusInfo.bg }]}>
             <View style={[styles.statusDot, { backgroundColor: statusInfo.color }]} />
-            <Text style={[styles.statusText, { color: statusInfo.color }]}>
-              {statusInfo.label}
-            </Text>
+            <Text style={[styles.statusText, { color: statusInfo.color }]}>{statusInfo.label}</Text>
           </View>
         </View>
 
@@ -263,7 +259,7 @@ export default function ObjectDetailScreen() {
 
 // Extrato simulado de chamadas locais
 const api = {
-  post: async (url: string, data: any) => {
+  post: async (_url: string, _data: any) => {
     return new Promise((resolve) => setTimeout(resolve, 300));
   },
 };

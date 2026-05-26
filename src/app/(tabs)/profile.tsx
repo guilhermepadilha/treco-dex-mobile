@@ -10,18 +10,14 @@ export default function ProfileTab() {
   const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
-    Alert.alert(
-      'Encerrar Sessão',
-      'Tem certeza de que deseja sair de sua conta do TrecoDex?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Sair',
-          style: 'destructive',
-          onPress: () => logout(),
-        },
-      ],
-    );
+    Alert.alert('Encerrar Sessão', 'Tem certeza de que deseja sair de sua conta do TrecoDex?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Sair',
+        style: 'destructive',
+        onPress: () => logout(),
+      },
+    ]);
   };
 
   return (
@@ -45,11 +41,7 @@ export default function ProfileTab() {
         </View>
       </View>
 
-      <TouchableOpacity
-        style={styles.logoutButton}
-        onPress={handleLogout}
-        activeOpacity={0.8}
-      >
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
         <Text style={styles.logoutButtonText}>ENCERRAR SESSÃO</Text>
       </TouchableOpacity>
     </View>

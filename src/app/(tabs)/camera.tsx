@@ -8,7 +8,6 @@ import {
   Image,
   TextInput,
   Platform,
-  Alert,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Canvas, Line } from '@shopify/react-native-skia';
@@ -60,12 +59,22 @@ export default function CameraTab() {
   if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
-        <Ionicons name="camera-reverse-outline" size={64} color="#FF5C5C" style={{ marginBottom: 16 }} />
+        <Ionicons
+          name="camera-reverse-outline"
+          size={64}
+          color="#FF5C5C"
+          style={{ marginBottom: 16 }}
+        />
         <Text style={styles.permissionTitle}>ACESSO À CÂMERA NECESSÁRIO</Text>
         <Text style={styles.permissionSubtitle}>
-          O TrecoDex precisa de acesso à câmera para digitalizar e cadastrar seus trecos com inteligência visual.
+          O TrecoDex precisa de acesso à câmera para digitalizar e cadastrar seus trecos com
+          inteligência visual.
         </Text>
-        <TouchableOpacity style={styles.permissionBtn} onPress={requestPermission} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.permissionBtn}
+          onPress={requestPermission}
+          activeOpacity={0.8}
+        >
           <Text style={styles.permissionBtnText}>CONCEDER PERMISSÃO</Text>
         </TouchableOpacity>
       </View>
@@ -98,7 +107,7 @@ export default function CameraTab() {
 
             addMessage(
               'AI',
-              '🔍 Identifiquei um dispositivo eletrônico compacto com cabo (carregador/fone).\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Organizador de Cabos** no cômodo **Escritório** (Confiança: 98%).\n\nDeseja confirmar essa recomendação?'
+              '🔍 Identifiquei um dispositivo eletrônico compacto com cabo (carregador/fone).\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Organizador de Cabos** no cômodo **Escritório** (Confiança: 98%).\n\nDeseja confirmar essa recomendação?',
             );
             nextStep('RECOMMENDATION_SHOWN');
             setLoading(false);
@@ -139,7 +148,8 @@ export default function CameraTab() {
                   identified: 'true',
                   objectName: 'Carregador Tipo C',
                   habitatName: 'Organizador de Cabos (Escritório)',
-                  reasoning: 'Item identificado via busca semântica em cache local síncrono offline.',
+                  reasoning:
+                    'Item identificado via busca semântica em cache local síncrono offline.',
                   photoUri: photo.uri,
                   compressedUri: compressionResult.uri,
                 },
@@ -162,7 +172,7 @@ export default function CameraTab() {
                   },
                 });
               },
-              onError: (error) => {
+              onError: (_error) => {
                 // Se a rede falhar, cai no mock local-first
                 setIsCapturing(false);
                 router.push({
@@ -171,7 +181,8 @@ export default function CameraTab() {
                     identified: 'true',
                     objectName: 'Carregador Tipo C',
                     habitatName: 'Organizador de Cabos (Escritório)',
-                    reasoning: 'Não foi possível contatar o servidor de IA. Utilizando busca analítica local.',
+                    reasoning:
+                      'Não foi possível contatar o servidor de IA. Utilizando busca analítica local.',
                     photoUri: photo.uri,
                     compressedUri: compressionResult.uri,
                   },
@@ -194,7 +205,7 @@ export default function CameraTab() {
     setTimeout(() => {
       addMessage(
         'AI',
-        '⚡ Excelente escolha! O treco foi cadastrado com sucesso e já está integrado à sua Pokédex de trecos.\n\nSempre que precisar encontrar, basta buscar por "Carregador" ou olhar na aba principal!'
+        '⚡ Excelente escolha! O treco foi cadastrado com sucesso e já está integrado à sua Pokédex de trecos.\n\nSempre que precisar encontrar, basta buscar por "Carregador" ou olhar na aba principal!',
       );
       nextStep('FINISHED');
       setLoading(false);
@@ -204,7 +215,10 @@ export default function CameraTab() {
   const handleCustomHabitat = () => {
     addMessage('USER', 'Quero registrar em outro lugar...');
     nextStep('CONFIRMING');
-    addMessage('AI', 'Entendido! Por favor, digite o nome do novo habitat onde deseja guardar este treco:');
+    addMessage(
+      'AI',
+      'Entendido! Por favor, digite o nome do novo habitat onde deseja guardar este treco:',
+    );
   };
 
   const handleSendChatText = () => {
@@ -218,7 +232,7 @@ export default function CameraTab() {
     setTimeout(() => {
       addMessage(
         'AI',
-        `✅ Entendido! Guardando no novo habitat: **"${userText}"**.\nO registro do treco foi finalizado com sucesso!`
+        `✅ Entendido! Guardando no novo habitat: **"${userText}"**.\nO registro do treco foi finalizado com sucesso!`,
       );
       nextStep('FINISHED');
       setLoading(false);
@@ -253,7 +267,12 @@ export default function CameraTab() {
               style={[styles.modeToggleBtn, cameraMode === 'ONBOARDING' && styles.activeModeBtn]}
               onPress={() => setCameraMode('ONBOARDING')}
             >
-              <Text style={[styles.modeToggleText, cameraMode === 'ONBOARDING' && styles.activeModeText]}>
+              <Text
+                style={[
+                  styles.modeToggleText,
+                  cameraMode === 'ONBOARDING' && styles.activeModeText,
+                ]}
+              >
                 CADASTRO CHAT
               </Text>
             </TouchableOpacity>
@@ -262,7 +281,9 @@ export default function CameraTab() {
               style={[styles.modeToggleBtn, cameraMode === 'SEARCH' && styles.activeModeBtn]}
               onPress={() => setCameraMode('SEARCH')}
             >
-              <Text style={[styles.modeToggleText, cameraMode === 'SEARCH' && styles.activeModeText]}>
+              <Text
+                style={[styles.modeToggleText, cameraMode === 'SEARCH' && styles.activeModeText]}
+              >
                 BUSCA RÁPIDA
               </Text>
             </TouchableOpacity>
@@ -271,7 +292,9 @@ export default function CameraTab() {
           {/* Dica da Câmera */}
           <View style={styles.tipOverlay}>
             <Text style={styles.tipText}>
-              {cameraMode === 'ONBOARDING' ? 'Cadastre um novo treco assistido' : 'Descubra onde o item deve ser guardado'}
+              {cameraMode === 'ONBOARDING'
+                ? 'Cadastre um novo treco assistido'
+                : 'Descubra onde o item deve ser guardado'}
             </Text>
           </View>
 
@@ -282,10 +305,17 @@ export default function CameraTab() {
             ) : (
               <TouchableOpacity
                 style={[styles.captureBtn, cameraMode === 'SEARCH' && styles.searchCaptureBtn]}
-                onPress={cameraMode === 'ONBOARDING' ? handleCaptureOnboarding : handleCaptureSearch}
+                onPress={
+                  cameraMode === 'ONBOARDING' ? handleCaptureOnboarding : handleCaptureSearch
+                }
                 activeOpacity={0.8}
               >
-                <View style={[styles.captureBtnInner, cameraMode === 'SEARCH' && styles.searchCaptureBtnInner]} />
+                <View
+                  style={[
+                    styles.captureBtnInner,
+                    cameraMode === 'SEARCH' && styles.searchCaptureBtnInner,
+                  ]}
+                />
               </TouchableOpacity>
             )}
           </View>
@@ -295,9 +325,7 @@ export default function CameraTab() {
         <View style={styles.chatContainer}>
           {/* Header do Chat */}
           <View style={styles.chatHeader}>
-            {photoUri && (
-              <Image source={{ uri: photoUri }} style={styles.chatHeaderThumbnail} />
-            )}
+            {photoUri && <Image source={{ uri: photoUri }} style={styles.chatHeaderThumbnail} />}
             <View>
               <Text style={styles.chatHeaderTitle}>CADASTRO CONVERSACIONAL</Text>
               <Text style={styles.chatHeaderSubtitle}>IA Multimodal Onboarding</Text>
@@ -351,7 +379,11 @@ export default function CameraTab() {
                   autoCorrect={false}
                   onSubmitEditing={handleSendChatText}
                 />
-                <TouchableOpacity style={styles.sendBtn} onPress={handleSendChatText} activeOpacity={0.7}>
+                <TouchableOpacity
+                  style={styles.sendBtn}
+                  onPress={handleSendChatText}
+                  activeOpacity={0.7}
+                >
                   <Ionicons name="send" size={16} color="#0A192F" />
                 </TouchableOpacity>
               </View>
@@ -631,11 +663,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     letterSpacing: 1,
-  },
-  loaderContainer: {
-    flex: 1,
-    backgroundColor: '#0A192F',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });

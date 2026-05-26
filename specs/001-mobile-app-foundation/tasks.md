@@ -121,9 +121,9 @@
 
 **Purpose**: General stability, error boundaries, styling, and final checks.
 
-- [ ] T031 [P] Setup global error boundary, offline warning toast, and custom layout styling in `/src/app/_layout.tsx`
-- [ ] T032 Write end-to-end integration manual tests in `/specs/001-mobile-app-foundation/quickstart.md`
-- [ ] T033 [P] Verify code quality, linting issues, and run formatting check across all files in `/src/`
+- [x] T031 [P] Setup global error boundary, offline warning toast, and custom layout styling in `/src/app/_layout.tsx`
+- [x] T032 Write end-to-end integration manual tests in `/specs/001-mobile-app-foundation/quickstart.md`
+- [x] T033 [P] Verify code quality, linting issues, and run formatting check across all files in `/src/`
 
 ---
 

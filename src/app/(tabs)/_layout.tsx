@@ -48,11 +48,7 @@ export default function TabsLayout() {
           title: 'TRECOS',
           headerTitle: '⚡ MEUS TRECOS',
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'grid' : 'grid-outline'}
-              size={size}
-              color={color}
-            />
+            <Ionicons name={focused ? 'grid' : 'grid-outline'} size={size} color={color} />
           ),
         }}
       />
@@ -62,11 +58,7 @@ export default function TabsLayout() {
           title: 'SCANNER',
           headerTitle: '📷 DISPOSITIVO DE BUSCA',
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'camera' : 'camera-outline'}
-              size={size}
-              color={color}
-            />
+            <Ionicons name={focused ? 'camera' : 'camera-outline'} size={size} color={color} />
           ),
         }}
       />
@@ -76,11 +68,7 @@ export default function TabsLayout() {
           title: 'PERFIL',
           headerTitle: '👤 TRECO-MASTER',
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'person' : 'person-outline'}
-              size={size}
-              color={color}
-            />
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} />
           ),
         }}
       />

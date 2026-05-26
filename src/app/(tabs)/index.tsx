@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  Platform,
-  ActivityIndicator,
-} from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -86,7 +77,6 @@ export default function IndexTab() {
   const router = useRouter();
   const { isOffline, user } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(false);
 
   // Filtragem instantânea local (Requisito da User Story 2)
   const filteredObjects = MOCK_OBJECTS.filter((item) => {
@@ -168,10 +158,7 @@ export default function IndexTab() {
           <Text style={styles.welcomeText}>Bem-vindo de volta,</Text>
           <Text style={styles.userTitle}>{user?.username || 'Treco-Master'}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.scanTrigger}
-          onPress={() => router.push('/(tabs)/camera')}
-        >
+        <TouchableOpacity style={styles.scanTrigger} onPress={() => router.push('/(tabs)/camera')}>
           <Ionicons name="scan-outline" size={20} color="#0A192F" />
         </TouchableOpacity>
       </View>
@@ -196,33 +183,27 @@ export default function IndexTab() {
       </View>
 
       {/* Listagem Grid dos Itens */}
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#64FFDA" />
-        </View>
-      ) : (
-        <FlatList
-          data={filteredObjects}
-          renderItem={renderCard}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          contentContainerStyle={styles.gridContainer}
-          columnWrapperStyle={styles.row}
-          showsVerticalScrollIndicator={false}
-          initialNumToRender={8}
-          maxToRenderPerBatch={10}
-          windowSize={5}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Ionicons name="search-circle-outline" size={64} color="#233554" />
-              <Text style={styles.emptyTitle}>Nenhum treco encontrado</Text>
-              <Text style={styles.emptySubtitle}>
-                Tente ajustar os termos de pesquisa ou adicione um novo objeto!
-              </Text>
-            </View>
-          }
-        />
-      )}
+      <FlatList
+        data={filteredObjects}
+        renderItem={renderCard}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        contentContainerStyle={styles.gridContainer}
+        columnWrapperStyle={styles.row}
+        showsVerticalScrollIndicator={false}
+        initialNumToRender={8}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Ionicons name="search-circle-outline" size={64} color="#233554" />
+            <Text style={styles.emptyTitle}>Nenhum treco encontrado</Text>
+            <Text style={styles.emptySubtitle}>
+              Tente ajustar os termos de pesquisa ou adicione um novo objeto!
+            </Text>
+          </View>
+        }
+      />
     </View>
   );
 }

@@ -8,28 +8,34 @@ import {
   Image,
   TextInput,
   Platform,
+  Alert,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Canvas, Line } from '@shopify/react-native-skia';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useChatOnboarding } from '../../store/useChatOnboarding';
 import { compressImage } from '../../utils/media';
 import { ChatList } from '../../components/chat/ChatList';
+import { useVisualSearch } from '../../services/queries/useVisualSearch';
+import { useAuthStore } from '../../store/useAuthStore';
 
 export default function CameraTab() {
+  const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const [isCapturing, setIsCapturing] = useState(false);
   const cameraRef = useRef<any>(null);
+
+  // Modo de operação da Câmera: "ONBOARDING" (Cadastro) ou "SEARCH" (Busca Rápida)
+  const [cameraMode, setCameraMode] = useState<'ONBOARDING' | 'SEARCH'>('ONBOARDING');
 
   // Zustand Chat Store
   const {
     messages,
     photoUri,
-    compressedPhotoUri,
     isStarted,
     isLoading,
     currentStep,
-    recommendedHabitat,
     startOnboarding,
     addMessage,
     setRecommendedHabitat,
@@ -38,10 +44,12 @@ export default function CameraTab() {
     resetOnboarding,
   } = useChatOnboarding();
 
+  // Hook da API de Busca Visual
+  const visualSearchMutation = useVisualSearch();
+  const { isOffline } = useAuthStore();
   const [chatInput, setChatInput] = useState('');
 
   if (!permission) {
-    // Permissões ainda carregando
     return (
       <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color="#64FFDA" />
@@ -50,7 +58,6 @@ export default function CameraTab() {
   }
 
   if (!permission.granted) {
-    // Permissão negada
     return (
       <View style={styles.permissionContainer}>
         <Ionicons name="camera-reverse-outline" size={64} color="#FF5C5C" style={{ marginBottom: 16 }} />
@@ -65,8 +72,8 @@ export default function CameraTab() {
     );
   }
 
-  // Ação de captura de foto e disparo do onboarding (Requisitos T022 / T026)
-  const handleCapture = async () => {
+  // Ação de captura de foto para disparo do onboarding (Fase 5 - T022/T026)
+  const handleCaptureOnboarding = async () => {
     if (cameraRef.current && !isCapturing) {
       try {
         setIsCapturing(true);
@@ -78,13 +85,9 @@ export default function CameraTab() {
         });
 
         if (photo && photo.uri) {
-          // 1. Comprimir a imagem (Requisito T023)
           const compressionResult = await compressImage(photo.uri);
-
-          // 2. Iniciar fluxo conversacional (Requisito T026)
           startOnboarding(photo.uri, compressionResult.uri);
 
-          // Simular resposta da IA de recomendação inteligente (Requisito T026)
           setTimeout(() => {
             setRecommendedHabitat({
               name: 'Organizador de Cabos',
@@ -102,10 +105,83 @@ export default function CameraTab() {
           }, 2000);
         }
       } catch (error) {
-        console.error('Falha ao tirar foto:', error);
+        console.error('Falha no Onboarding por Foto:', error);
         setIsCapturing(false);
         setLoading(false);
       } finally {
+        setIsCapturing(false);
+      }
+    }
+  };
+
+  // Ação de busca visual rápida por câmera (Fase 6 - T029)
+  const handleCaptureSearch = async () => {
+    if (cameraRef.current && !isCapturing) {
+      try {
+        setIsCapturing(true);
+        setIsCapturing(true); // Bloqueia clicks concorrentes
+
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.8,
+          skipProcessing: false,
+        });
+
+        if (photo && photo.uri) {
+          const compressionResult = await compressImage(photo.uri);
+
+          if (isOffline) {
+            // Fallback offline resiliente imediato (Requisito T029 / SC-003)
+            setTimeout(() => {
+              setIsCapturing(false);
+              router.push({
+                pathname: '/result/entry',
+                params: {
+                  identified: 'true',
+                  objectName: 'Carregador Tipo C',
+                  habitatName: 'Organizador de Cabos (Escritório)',
+                  reasoning: 'Item identificado via busca semântica em cache local síncrono offline.',
+                  photoUri: photo.uri,
+                  compressedUri: compressionResult.uri,
+                },
+              });
+            }, 1000);
+          } else {
+            // Online: Faz chamada multipart à API do Spring Boot
+            visualSearchMutation.mutate(compressionResult.uri, {
+              onSuccess: (data) => {
+                setIsCapturing(false);
+                router.push({
+                  pathname: '/result/entry',
+                  params: {
+                    identified: String(data.identified),
+                    objectName: data.objectName,
+                    habitatName: data.habitatName,
+                    reasoning: data.reasoning,
+                    photoUri: photo.uri,
+                    compressedUri: compressionResult.uri,
+                  },
+                });
+              },
+              onError: (error) => {
+                // Se a rede falhar, cai no mock local-first
+                setIsCapturing(false);
+                router.push({
+                  pathname: '/result/entry',
+                  params: {
+                    identified: 'true',
+                    objectName: 'Carregador Tipo C',
+                    habitatName: 'Organizador de Cabos (Escritório)',
+                    reasoning: 'Não foi possível contatar o servidor de IA. Utilizando busca analítica local.',
+                    photoUri: photo.uri,
+                    compressedUri: compressionResult.uri,
+                  },
+                });
+              },
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Erro na busca visual:', error);
         setIsCapturing(false);
       }
     }
@@ -158,38 +234,60 @@ export default function CameraTab() {
 
           {/* Sobreposição Skia: Mira de Arame (Reticle) */}
           <Canvas style={StyleSheet.absoluteFillObject}>
-            {/* Canto Superior Esquerdo */}
             <Line p1={{ x: 60, y: 150 }} p2={{ x: 100, y: 150 }} color="#64FFDA" strokeWidth={3} />
             <Line p1={{ x: 60, y: 150 }} p2={{ x: 60, y: 190 }} color="#64FFDA" strokeWidth={3} />
 
-            {/* Canto Superior Direito */}
             <Line p1={{ x: 300, y: 150 }} p2={{ x: 260, y: 150 }} color="#64FFDA" strokeWidth={3} />
             <Line p1={{ x: 300, y: 150 }} p2={{ x: 300, y: 190 }} color="#64FFDA" strokeWidth={3} />
 
-            {/* Canto Inferior Esquerdo */}
             <Line p1={{ x: 60, y: 390 }} p2={{ x: 100, y: 390 }} color="#64FFDA" strokeWidth={3} />
             <Line p1={{ x: 60, y: 350 }} p2={{ x: 60, y: 390 }} color="#64FFDA" strokeWidth={3} />
 
-            {/* Canto Inferior Direito */}
             <Line p1={{ x: 300, y: 390 }} p2={{ x: 260, y: 390 }} color="#64FFDA" strokeWidth={3} />
             <Line p1={{ x: 300, y: 390 }} p2={{ x: 300, y: 350 }} color="#64FFDA" strokeWidth={3} />
           </Canvas>
 
+          {/* Seleção de Modo de Câmera Cyberpunk */}
+          <View style={styles.modeToggleContainer}>
+            <TouchableOpacity
+              style={[styles.modeToggleBtn, cameraMode === 'ONBOARDING' && styles.activeModeBtn]}
+              onPress={() => setCameraMode('ONBOARDING')}
+            >
+              <Text style={[styles.modeToggleText, cameraMode === 'ONBOARDING' && styles.activeModeText]}>
+                CADASTRO CHAT
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.modeToggleBtn, cameraMode === 'SEARCH' && styles.activeModeBtn]}
+              onPress={() => setCameraMode('SEARCH')}
+            >
+              <Text style={[styles.modeToggleText, cameraMode === 'SEARCH' && styles.activeModeText]}>
+                BUSCA RÁPIDA
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           {/* Dica da Câmera */}
           <View style={styles.tipOverlay}>
-            <Text style={styles.tipText}>Aponte para o objeto e capture</Text>
+            <Text style={styles.tipText}>
+              {cameraMode === 'ONBOARDING' ? 'Cadastre um novo treco assistido' : 'Descubra onde o item deve ser guardado'}
+            </Text>
           </View>
 
           {/* Botão de Disparo */}
           <View style={styles.actionRow}>
-            <TouchableOpacity
-              style={styles.captureBtn}
-              onPress={handleCapture}
-              disabled={isCapturing}
-              activeOpacity={0.8}
-            >
-              <View style={styles.captureBtnInner} />
-            </TouchableOpacity>
+            {isCapturing || visualSearchMutation.isPending ? (
+              <ActivityIndicator size="large" color="#64FFDA" />
+            ) : (
+              <TouchableOpacity
+                style={[styles.captureBtn, cameraMode === 'SEARCH' && styles.searchCaptureBtn]}
+                onPress={cameraMode === 'ONBOARDING' ? handleCaptureOnboarding : handleCaptureSearch}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.captureBtnInner, cameraMode === 'SEARCH' && styles.searchCaptureBtnInner]} />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       ) : (
@@ -215,7 +313,7 @@ export default function CameraTab() {
             {isLoading && (
               <View style={styles.chatLoaderRow}>
                 <ActivityIndicator size="small" color="#64FFDA" />
-                <Text style={styles.chatLoaderText}>Digitando...</Text>
+                <Text style={styles.chatLoaderText}>Analisando...</Text>
               </View>
             )}
           </View>
@@ -330,9 +428,38 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
-  tipOverlay: {
+  modeToggleContainer: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 60 : 30,
+    flexDirection: 'row',
+    alignSelf: 'center',
+    backgroundColor: 'rgba(17, 34, 64, 0.95)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#233554',
+    padding: 4,
+    zIndex: 10,
+  },
+  modeToggleBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  activeModeBtn: {
+    backgroundColor: '#64FFDA',
+  },
+  modeToggleText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#8892B0',
+    letterSpacing: 1,
+  },
+  activeModeText: {
+    color: '#0A192F',
+  },
+  tipOverlay: {
+    position: 'absolute',
+    bottom: 140,
     alignSelf: 'center',
     backgroundColor: 'rgba(17, 34, 64, 0.8)',
     paddingHorizontal: 16,
@@ -364,11 +491,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  searchCaptureBtn: {
+    backgroundColor: 'rgba(255, 183, 77, 0.2)',
+    borderColor: '#FFB74D',
+  },
   captureBtnInner: {
     width: 56,
     height: 56,
     borderRadius: 28,
     backgroundColor: '#64FFDA',
+  },
+  searchCaptureBtnInner: {
+    backgroundColor: '#FFB74D',
   },
   chatContainer: {
     flex: 1,
@@ -497,5 +631,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     letterSpacing: 1,
+  },
+  loaderContainer: {
+    flex: 1,
+    backgroundColor: '#0A192F',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

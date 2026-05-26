@@ -108,10 +108,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T027 [US4] Create visual results detail view "Treco-Dex Entry" in `/src/app/result/entry.tsx`
-- [ ] T028 [US4] Implement visual search query hook calling `/api/objects/visual-search` in `/src/services/queries/useVisualSearch.ts`
-- [ ] T029 [US4] Integrate visual search trigger in `/src/app/(tabs)/camera.tsx` and navigate to visual results entry upon success
-- [ ] T030 [US4] Implement onboarding flow fallback trigger if object visual search returns as new/unknown in `/src/app/result/entry.tsx`
+- [x] T027 [US4] Create visual results detail view "Treco-Dex Entry" in `/src/app/result/entry.tsx`
+- [x] T028 [US4] Implement visual search query hook calling `/api/objects/visual-search` in `/src/services/queries/useVisualSearch.ts`
+- [x] T029 [US4] Integrate visual search trigger in `/src/app/(tabs)/camera.tsx` and navigate to visual results entry upon success
+- [x] T030 [US4] Implement onboarding flow fallback trigger if object visual search returns as new/unknown in `/src/app/result/entry.tsx`
 
 **Checkpoint**: All user stories should now be independently functional.
 

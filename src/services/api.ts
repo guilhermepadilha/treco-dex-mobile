@@ -3,7 +3,7 @@ import { useAuthStore } from '../store/useAuthStore';
 // URL base padrão da API Spring Boot.
 // NOTA: Em emuladores Android ou dispositivos reais na mesma rede local, recomenda-se configurar
 // a variável EXPO_PUBLIC_API_URL apontando para o IP do seu host na rede local.
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.68.107:8082';
 
 /**
  * Interface descrevendo detalhes estruturados de erros retornados pela API.

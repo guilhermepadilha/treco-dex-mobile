@@ -70,7 +70,7 @@
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Create basic tab-navigation structure with file routes in `/src/app/(tabs)/_layout.tsx`
+- [x] T015 [US2] Create basic tab-navigation structure with file routes in `/src/app/(tabs)/_layout.tsx`
 - [ ] T016 [US2] Create high-performance Pokedex grid layout for objects list in `/src/app/(tabs)/index.tsx`
 - [ ] T017 [P] [US2] Create object detail modal/screen in `/src/app/object/[id].tsx`
 - [ ] T018 [US2] Implement TanStack Query fetchers and custom hooks for fetching object lists and habitats in `/src/services/queries/useObjects.ts`

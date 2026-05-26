@@ -21,9 +21,9 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [X] T001 Initialize React Native Expo project structure at `/home/guilherme.padilha/projetos/treco-dex-mobile` using typescript template
-- [ ] T002 Configure core dependencies in `/home/guilherme.padilha/projetos/treco-dex-mobile/package.json` (`expo-router`, `zustand`, `@tanstack/react-query`, `react-native-mmkv`, `react-native-reanimated`, `moti`, `@shopify/react-native-skia`)
-- [ ] T003 [P] Configure TypeScript compiler options in `/tsconfig.json` and strict ESLint/Prettier configuration in `/.eslintrc.js`
+- [x] T001 Initialize React Native Expo project structure at `/home/guilherme.padilha/projetos/treco-dex-mobile` using typescript template
+- [x] T002 Configure core dependencies in `/home/guilherme.padilha/projetos/treco-dex-mobile/package.json` (`expo-router`, `zustand`, `@tanstack/react-query`, `react-native-mmkv`, `react-native-reanimated`, `moti`, `@shopify/react-native-skia`)
+- [x] T003 [P] Configure TypeScript compiler options in `/tsconfig.json` and strict ESLint/Prettier configuration in `/.eslintrc.js`
 
 ---
 
@@ -33,12 +33,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Initialize MMKV storage client instance and helpers in `/src/utils/storage.ts`
-- [ ] T005 Setup global Zustand authentication store in `/src/store/useAuthStore.ts`
-- [ ] T006 [P] Initialize typed Axios/Fetch API client with automatic JWT bearer token headers and interceptors in `/src/services/api.ts`
-- [ ] T007 Setup global Zustand offline sync store queue to track pending mutations in `/src/store/useSyncStore.ts`
-- [ ] T008 [P] Configure TanStack Query client with MMKV local cache persister in `/src/services/queryClient.ts`
-- [ ] T009 Create root router layout file containing QueryClient, Zustand, and Theme Providers in `/src/app/_layout.tsx`
+- [x] T004 [P] Initialize MMKV storage client instance and helpers in `/src/utils/storage.ts`
+- [x] T005 Setup global Zustand authentication store in `/src/store/useAuthStore.ts`
+- [x] T006 [P] Initialize typed Axios/Fetch API client with automatic JWT bearer token headers and interceptors in `/src/services/api.ts`
+- [x] T007 Setup global Zustand offline sync store queue to track pending mutations in `/src/store/useSyncStore.ts`
+- [x] T008 [P] Configure TanStack Query client with MMKV local cache persister in `/src/services/queryClient.ts`
+- [x] T009 Create root router layout file containing QueryClient, Zustand, and Theme Providers in `/src/app/_layout.tsx`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

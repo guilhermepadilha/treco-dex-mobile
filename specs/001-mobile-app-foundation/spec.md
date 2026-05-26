@@ -19,11 +19,12 @@ Esta especificação define a fundação e os fluxos de experiência do usuário
 ## Clarifications
 
 ### Session 2026-05-21
+
 - Q: Qual o formato e limite máximo de tamanho de arquivo após a compressão da foto no dispositivo antes de enviar para o backend? → A: JPEG comprimido com tamanho máximo de 500KB (Opção A).
 
 ---
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Autenticação Segura & Sessão Offline (Priority: P1)
 
@@ -34,6 +35,7 @@ Como um usuário do TrecoDex, quero realizar login e ter minha sessão mantida d
 **Independent Test**: Pode ser testado realizando o login com credenciais válidas, desativando a internet do dispositivo, fechando/abrindo o app e verificando se o dashboard ainda carrega as informações do catálogo a partir do cache local.
 
 **Acceptance Scenarios**:
+
 1. **Given** que o usuário abre o aplicativo pela primeira vez, **When** ele insere as credenciais na tela de login, **Then** o app obtém o token JWT do backend (`treco-dex-api`), salva-o de forma segura localmente (Keyring/Keystore) e redireciona para a tela inicial.
 2. **Given** que o usuário possui uma sessão ativa, **When** ele abre o aplicativo sem conexão de rede, **Then** o app carrega o último estado do catálogo salvo no cache local e apresenta um indicador visual discreto de "Modo Offline".
 3. **Given** que o usuário decide sair (logout), **When** ele clica no botão de logout, **Then** todos os dados de sessão e cache de segurança são limpos do armazenamento local.
@@ -49,6 +51,7 @@ Como um usuário organizando minha casa, quero visualizar todos os meus trecos e
 **Independent Test**: Pode ser testado buscando termos específicos que existem no cache local e validando que o grid é atualizado em tempo real com transições visuais fluidas.
 
 **Acceptance Scenarios**:
+
 1. **Given** o catálogo com objetos e habitats sincronizados, **When** o usuário digita na barra de busca, **Then** a lista de objetos é filtrada instantaneamente por nome, tags ou nome do habitat sem latência de rede.
 2. **Given** o grid de objetos, **When** o usuário clica em um item, **Then** ele vê os detalhes do treco (propriedades físicas, estado atual, fotos associadas e a localização exata do habitat com a foto do local esperado).
 3. **Given** um objeto fora do seu local correto, **When** o usuário atualiza o estado do objeto para "Em habitat" pela interface, **Then** a mudança de estado é refletida visualmente com uma animação sutil e salva localmente.
@@ -64,6 +67,7 @@ Como um usuário com um novo objeto que quero catalogar, quero iniciar uma conve
 **Independent Test**: Pode ser testado simulando o envio de uma foto tirada pela câmera, recebendo a recomendação e finalizando a associação de um novo habitat.
 
 **Acceptance Scenarios**:
+
 1. **Given** que o usuário inicia o cadastro de um novo item, **When** ele tira uma foto usando o componente de câmera integrado do app, **Then** a imagem é comprimida localmente e enviada em background, iniciando a sessão de onboarding.
 2. **Given** a sugestão de habitat fornecida pela IA factual/generativa do backend, **When** o usuário confirma a recomendação, **Then** o objeto é registrado com sucesso na base de dados e no cache local.
 3. **Given** que a IA sugere um habitat inexistente ou que o usuário rejeita a sugestão, **When** o usuário opta por criar um novo habitat, **Then** o app guia o usuário no processo de nomear o novo local e capturar uma foto rápida de contexto do ambiente.
@@ -79,6 +83,7 @@ Como um usuário que encontrou um objeto perdido ou não identificado, quero apo
 **Independent Test**: Pode ser testado capturando um objeto com a câmera e verificando se o app exibe a tela de resultado "Encontrado" com os dados factuais corretos do catálogo.
 
 **Acceptance Scenarios**:
+
 1. **Given** que o usuário deseja encontrar onde guardar um item, **When** ele tira uma foto através do botão de busca rápida por câmera, **Then** a foto é enviada para `/api/objects/visual-search`.
 2. **Given** um retorno de sucesso de objeto já catalogado, **When** a resposta é recebida, **Then** o app exibe uma tela visual premium contendo a descrição divertida no estilo Pokédex, a localização do habitat e a foto do habitat para guiar a devolução correta do treco.
 3. **Given** um retorno indicando que o item é inédito, **When** a resposta da IA é exibida, **Then** o app abre a máquina de estados de onboarding conversacional perguntando ao usuário se ele deseja registrar o item sugerido.
@@ -88,18 +93,18 @@ Como um usuário que encontrou um objeto perdido ou não identificado, quero apo
 ### Edge Cases
 
 - **Sem Conexão ao Registrar (Modo Estrito Offline)**:
-  - O que acontece se o usuário tirar a foto e o dispositivo perder totalmente o sinal antes do upload? 
-  - *Comportamento*: O app armazena a tarefa de upload em uma fila de sincronização offline persistente, exibindo uma mensagem amigável de que o item será analisado e cadastrado assim que a conexão retornar.
+  - O que acontece se o usuário tirar a foto e o dispositivo perder totalmente o sinal antes do upload?
+  - _Comportamento_: O app armazena a tarefa de upload em uma fila de sincronização offline persistente, exibindo uma mensagem amigável de que o item será analisado e cadastrado assim que a conexão retornar.
 - **Falha Parcial da Câmera ou Sem Permissão de Hardware**:
   - Como o sistema se comporta caso o usuário recuse o acesso à câmera?
-  - *Comportamento*: O app apresenta uma tela alternativa elegante convidando o usuário a digitar o nome do objeto manualmente ou a permitir o acesso à câmera através das configurações do sistema operacional.
+  - _Comportamento_: O app apresenta uma tela alternativa elegante convidando o usuário a digitar o nome do objeto manualmente ou a permitir o acesso à câmera através das configurações do sistema operacional.
 - **Conflito de Sincronização (Edição Concorrente)**:
   - O que acontece se um objeto for editado offline no celular e modificado no backend concorrentemente por outro cliente?
-  - *Comportamento*: O app adota a estratégia de "Última Edição Prevalece" baseada no timestamp da alteração, mantendo logs estruturados locais.
+  - _Comportamento_: O app adota a estratégia de "Última Edição Prevalece" baseada no timestamp da alteração, mantendo logs estruturados locais.
 
 ---
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -122,7 +127,7 @@ Como um usuário que encontrou um objeto perdido ou não identificado, quero apo
 
 ---
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ## Measurable Outcomes
 

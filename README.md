@@ -10,23 +10,23 @@ O **TrecoDex Mobile** é o aplicativo móvel oficial do ecossistema **TrecoDex**
 
 ## 🌟 Recursos Principais
 
-*   📷 **Busca Visual Multimodal**: Aponte a câmera para qualquer objeto doméstico para identificá-lo instantaneamente e descobrir onde ele deve ser guardado.
-*   🎮 **Experiência Gamificada ("Pokédex Style")**: Transforma a rotina de arrumação em um jogo divertido, com descrições engraçadas geradas por IA para seus pertences.
-*   🏡 **Navegação de Habitats**: Estrutura espacial e fotos reais do ponto de armazenamento exato de cada objeto.
-*   ⚡ **Offline-First Absoluto**: Carregamento instantâneo do catálogo e busca local ultraveloz em menos de 100ms, funcionando mesmo nos cantos sem internet da casa (garagem, subsolo, armários).
-*   💬 **Cadastro Conversacional**: Assistente inteligente por chat guiado para catalogar novos objetos de forma fácil, sem digitação burocrática.
-*   🔐 **Autenticação Segura**: Gerenciamento seguro de sessões locais e integração encriptada com o backend do TrecoDex API.
+- 📷 **Busca Visual Multimodal**: Aponte a câmera para qualquer objeto doméstico para identificá-lo instantaneamente e descobrir onde ele deve ser guardado.
+- 🎮 **Experiência Gamificada ("Pokédex Style")**: Transforma a rotina de arrumação em um jogo divertido, com descrições engraçadas geradas por IA para seus pertences.
+- 🏡 **Navegação de Habitats**: Estrutura espacial e fotos reais do ponto de armazenamento exato de cada objeto.
+- ⚡ **Offline-First Absoluto**: Carregamento instantâneo do catálogo e busca local ultraveloz em menos de 100ms, funcionando mesmo nos cantos sem internet da casa (garagem, subsolo, armários).
+- 💬 **Cadastro Conversacional**: Assistente inteligente por chat guiado para catalogar novos objetos de forma fácil, sem digitação burocrática.
+- 🔐 **Autenticação Segura**: Gerenciamento seguro de sessões locais e integração encriptada com o backend do TrecoDex API.
 
 ---
 
 ## 🛠️ Stack Tecnológica
 
-*   **Plataforma & Core**: React Native + Expo (TypeScript)
-*   **Navegação**: Expo Router (Roteamento baseado em arquivos)
-*   **Gerenciamento de Estado**: Zustand
-*   **Sincronização de APIs & Caching**: TanStack Query (React Query)
-*   **Persistência Offline**: MMKV (Chave-valor de alta performance)
-*   **Efeitos Gráficos & Animações**: Reanimated, Moti e React Native Skia (desempenho gráfico a 60/120 FPS)
+- **Plataforma & Core**: React Native + Expo (TypeScript)
+- **Navegação**: Expo Router (Roteamento baseado em arquivos)
+- **Gerenciamento de Estado**: Zustand
+- **Sincronização de APIs & Caching**: TanStack Query (React Query)
+- **Persistência Offline**: MMKV (Chave-valor de alta performance)
+- **Efeitos Gráficos & Animações**: Reanimated, Moti e React Native Skia (desempenho gráfico a 60/120 FPS)
 
 ---
 

@@ -10,6 +10,7 @@
 O objetivo deste plano é estabelecer a arquitetura técnica e o design de software para a fundação do aplicativo móvel **TrecoDex Mobile**, focado exclusivamente na robustez dos fluxos funcionais e resiliência de sincronização. Toda a estilização avançada, animações complexas e shaders de câmera estão **fora de escopo** para este MVP e postergados para outra etapa técnica. O layout do aplicativo será mantido extremamente simples (padrão de wireframe limpo).
 
 Nossa abordagem aproveita ao máximo a stack técnica homologada, já inicializando as bibliotecas como esqueletos funcionais estruturados para posterior estilização estética:
+
 - **Expo Router** para roteamento e fluxo de telas em formato de abas e modais funcionais básicos.
 - **Zustand** para gerenciamento de estado de fluxos e controle conversacional do onboarding.
 - **TanStack Query (React Query)** para chamadas e cache resiliente com o Spring Boot backend (`treco-dex-api`).
@@ -21,7 +22,8 @@ Nossa abordagem aproveita ao máximo a stack técnica homologada, já inicializa
 ## Technical Context
 
 **Language/Version**: TypeScript >= 5.0 (Strict mode ativo)  
-**Primary Dependencies**: 
+**Primary Dependencies**:
+
 - `expo` (SDK 50+)
 - `expo-router` (File-based navigation)
 - `zustand` (State management)
@@ -29,18 +31,18 @@ Nossa abordagem aproveita ao máximo a stack técnica homologada, já inicializa
 - `react-native-mmkv` (Fast local store)
 - `react-native-reanimated` & `moti` (Animations)
 - `@shopify/react-native-skia` (2D high-performance drawings & shaders)
-**Storage**: MMKV (Key-Value) e opcionais SQLite local  
-**Testing**: Jest + React Native Testing Library  
-**Target Platform**: iOS 15+ & Android 8+ (SDK 26+)  
-**Project Type**: Mobile Application  
-**Performance Goals**: Animações a 60/120 FPS fixos; tempo de resposta de buscas locais <100ms; tempo de cold start <1.2s.  
-**Constraints**: Funcionamento 100% offline para busca local e navegação; fila offline para uploads resilientes.
+  **Storage**: MMKV (Key-Value) e opcionais SQLite local  
+  **Testing**: Jest + React Native Testing Library  
+  **Target Platform**: iOS 15+ & Android 8+ (SDK 26+)  
+  **Project Type**: Mobile Application  
+  **Performance Goals**: Animações a 60/120 FPS fixos; tempo de resposta de buscas locais <100ms; tempo de cold start <1.2s.  
+  **Constraints**: Funcionamento 100% offline para busca local e navegação; fila offline para uploads resilientes.
 
 ---
 
 ## Constitution Check
 
-*GATE: Passed. O plano cumpre todas as diretrizes de UI Premium, Offline-First, IA-Native e Contratos Tipados estabelecidas na Constitution do Projeto.*
+_GATE: Passed. O plano cumpre todas as diretrizes de UI Premium, Offline-First, IA-Native e Contratos Tipados estabelecidas na Constitution do Projeto._
 
 - **Premium UI**: Skia + Reanimated + Moti garantem transições ricas de cards de objetos no padrão Pokédex cyberpunk.
 - **Offline-First**: Persistência via MMKV e gerenciamento de mutações offline via React Query.
@@ -92,6 +94,7 @@ src/
 ## Architectural Detail & Tech Design
 
 ### 1. Offline-First Sync Architecture (TanStack Query + MMKV)
+
 - O estado de dados de trecos e habitats é gerenciado na rede pelo **TanStack Query**.
 - Para garantir o carregamento offline instantâneo, persistiremos as queries em cache no **MMKV** utilizando o custom persister do TanStack Query (`createSyncStoragePersister`).
 - **Offline Mutations**: Modificações feitas offline (como alterar estado de um treco) são salvas em uma fila (`useSyncStore` do Zustand com persistência automática no MMKV). Ao detectar reconexão com a rede (`NetInfo`), um worker dispara as requisições em lote para o backend.
@@ -102,10 +105,10 @@ sequenceDiagram
     participant Store as MMKV Cache (Zustand/Query)
     participant RQ as TanStack Query
     participant API as Spring Boot API
-    
+
     User->>Store: Requisita Catálogo (Offline)
     Store-->>User: Retorna instantaneamente (<100ms)
-    
+
     User->>RQ: Solicita Refetch (Online)
     RQ->>API: GET /api/objects
     API-->>RQ: Retorna DTOs de Objetos
@@ -114,6 +117,7 @@ sequenceDiagram
 ```
 
 ### 2. Conversational Onboarding & Vision UI (Zustand + Camera)
+
 - A tela de Câmera nativa abre a câmera padrão do dispositivo com uma sobreposição Skia extremamente simples (uma mira de wireframe básica centralizada).
 - Ao tirar a foto, salvamos o buffer local, comprimimos a imagem usando biblioteca nativa e enviamos à API (`/api/objects/visual-search` ou `/api/media/upload`).
 - O diálogo interativo do chat é mantido em um store Zustand leve (`useChatOnboarding`), renderizando mensagens em caixas de textos básicas com transições nativas padrão. O Moti é instanciado em modo esquelético (transição de fade-in padrão de opacidade) apenas para validação de encadeamento de biblioteca.

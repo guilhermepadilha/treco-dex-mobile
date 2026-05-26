@@ -71,10 +71,10 @@
 ### Implementation for User Story 2
 
 - [x] T015 [US2] Create basic tab-navigation structure with file routes in `/src/app/(tabs)/_layout.tsx`
-- [ ] T016 [US2] Create high-performance Pokedex grid layout for objects list in `/src/app/(tabs)/index.tsx`
+- [x] T016 [US2] Create high-performance Pokedex grid layout for objects list in `/src/app/(tabs)/index.tsx`
 - [ ] T017 [P] [US2] Create object detail modal/screen in `/src/app/object/[id].tsx`
 - [ ] T018 [US2] Implement TanStack Query fetchers and custom hooks for fetching object lists and habitats in `/src/services/queries/useObjects.ts`
-- [ ] T019 [US2] Implement instant text-based local search and filtering of objects in `/src/app/(tabs)/index.tsx` without network latency
+- [x] T019 [US2] Implement instant text-based local search and filtering of objects in `/src/app/(tabs)/index.tsx` without network latency
 - [ ] T020 [US2] Implement object physical state modification (e.g. updating item state/location) in `/src/app/object/[id].tsx` with offline fallback to useSyncStore
 
 **Checkpoint**: At this point, User Stories 1 AND 2 both work independently.

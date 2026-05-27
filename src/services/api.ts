@@ -50,8 +50,18 @@ export const api = {
 
     // Cria e configura cabeçalhos padrão
     const headers = new Headers(options.headers);
-    headers.set('Content-Type', 'application/json');
-    headers.set('Accept', 'application/json');
+    
+    // Se o corpo for FormData, deixa o fetch calcular o Content-Type com boundary automaticamente
+    const isMultipart = options.body instanceof FormData;
+    if (isMultipart) {
+      headers.delete('Content-Type');
+    } else if (!headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+    
+    if (!headers.has('Accept')) {
+      headers.set('Accept', 'application/json');
+    }
 
     // Se houver token de autenticação salvo, injeta-o no cabeçalho
     if (token) {
@@ -149,10 +159,11 @@ export const api = {
     body: any,
     options: Omit<RequestOptions, 'method' | 'body'> = {},
   ): Promise<T> {
+    const isFormData = body instanceof FormData;
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
-      body: JSON.stringify(body),
+      body: isFormData ? body : JSON.stringify(body),
     });
   },
 
@@ -164,10 +175,11 @@ export const api = {
     body: any,
     options: Omit<RequestOptions, 'method' | 'body'> = {},
   ): Promise<T> {
+    const isFormData = body instanceof FormData;
     return this.request<T>(endpoint, {
       ...options,
       method: 'PUT',
-      body: JSON.stringify(body),
+      body: isFormData ? body : JSON.stringify(body),
     });
   },
 
@@ -186,10 +198,11 @@ export const api = {
     body: any,
     options: Omit<RequestOptions, 'method' | 'body'> = {},
   ): Promise<T> {
+    const isFormData = body instanceof FormData;
     return this.request<T>(endpoint, {
       ...options,
       method: 'PATCH',
-      body: JSON.stringify(body),
+      body: isFormData ? body : JSON.stringify(body),
     });
   },
 };

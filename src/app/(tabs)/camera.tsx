@@ -37,6 +37,7 @@ export default function CameraTab() {
     currentStep,
     startOnboarding,
     addMessage,
+    recommendedHabitat,
     setRecommendedHabitat,
     setLoading,
     nextStep,
@@ -47,6 +48,7 @@ export default function CameraTab() {
   const visualSearchMutation = useVisualSearch();
   const { isOffline } = useAuthStore();
   const [chatInput, setChatInput] = useState('');
+  const [chatContext, setChatContext] = useState<'OBJECT_NAME' | 'HABITAT'>('HABITAT');
 
   if (!permission) {
     return (
@@ -130,8 +132,21 @@ export default function CameraTab() {
                     `🔍 Sucesso! Identifiquei o objeto: **"${data.objectName}"**.\n\nCom base em meus sensores, recomendo o habitat:\n📍 **${data.habitatName}** (Confiança: 99%).\n\nLógica: ${data.reasoning}`,
                   );
                 } else {
-                  // Fallback dinâmico se a IA não identificou com precisão
-                  triggerDynamicFallback();
+                  // Se a IA identificou um objeto real (ex: "mouse") mas ele não está no catálogo local
+                  if (data.objectName && !data.objectName.includes('[demo]')) {
+                    setRecommendedHabitat({
+                      name: 'Novo Habitat',
+                      environmentName: 'Definir',
+                      description: 'Defina o local de armazenamento deste novo treco.',
+                      confidence: 1.0,
+                    });
+                    addMessage('AI', `🤖 ${data.message || `Não encontrei esse ser no meu catálogo. Isso é um ${data.objectName}?`}\n\nDeseja confirmar?`);
+                    nextStep('RECOMMENDATION_SHOWN');
+                    setLoading(false);
+                  } else {
+                    // Fallback dinâmico se a IA não identificou com precisão (ou se retornou o escorredor demo)
+                    triggerDynamicFallback();
+                  }
                 }
               },
               onError: () => {
@@ -152,7 +167,7 @@ export default function CameraTab() {
                   description: 'Prateleira superior, canto esquerdo.',
                   confidence: 0.94,
                   message:
-                    '☕ Identifiquei uma caneca/xícara de louça para bebidas quentes.\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Bancada de Lanches** no cômodo **Cozinha** (Confiança: 94%).',
+                    '☕ [demo] Identifiquei uma caneca/xícara de louça para bebidas quentes.\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Bancada de Lanches** no cômodo **Cozinha** (Confiança: 94%).',
                 },
                 {
                   habitat: 'Organizador de Cabos',
@@ -160,7 +175,7 @@ export default function CameraTab() {
                   description: 'Gaveteiro cinza, segunda gaveta.',
                   confidence: 0.98,
                   message:
-                    '🔍 Identifiquei um dispositivo eletrônico compacto com cabo (carregador/fone).\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Organizador de Cabos** no cômodo **Escritório** (Confiança: 98%).',
+                    '🔍 [demo] Identifiquei um dispositivo eletrônico compacto com cabo (carregador/fone).\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Organizador de Cabos** no cômodo **Escritório** (Confiança: 98%).',
                 },
                 {
                   habitat: 'Gaveta de Chaves',
@@ -168,7 +183,7 @@ export default function CameraTab() {
                   description: 'Porta-chaves de madeira próximo ao espelho.',
                   confidence: 0.97,
                   message:
-                    '🔑 Identifiquei um molho de chaves de metal com chaveiro decorativo.\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Gaveta de Chaves** no cômodo **Hall de Entrada** (Confiança: 97%).',
+                    '🔑 [demo] Identifiquei um molho de chaves de metal com chaveiro decorativo.\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Gaveta de Chaves** no cômodo **Hall de Entrada** (Confiança: 97%).',
                 },
                 {
                   habitat: 'Painel da TV',
@@ -176,7 +191,7 @@ export default function CameraTab() {
                   description: 'Suporte de acrílico fixado atrás do painel esquerdo.',
                   confidence: 0.95,
                   message:
-                    '📺 Identifiquei um controle remoto Smart preto com botões de atalho.\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Painel da TV** no cômodo **Sala de Estar** (Confiança: 95%).',
+                    '📺 [demo] Identifiquei um controle remoto Smart preto com botões de atalho.\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Painel da TV** no cômodo **Sala de Estar** (Confiança: 95%).',
                 },
                 {
                   habitat: 'Gaveta de Acessórios',
@@ -184,7 +199,7 @@ export default function CameraTab() {
                   description: 'Divisória interna de veludo cinza.',
                   confidence: 0.93,
                   message:
-                    '🕶️ Identifiquei um par de óculos com armação escura / lentes de sol.\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Gaveta de Acessórios** no cômodo **Quarto** (Confiança: 93%).',
+                    '🕶️ [demo] Identifiquei um par de óculos com armação escura / lentes de sol.\n\nCom base em seus padrões de organização, recomendo o habitat:\n📍 **Gaveta de Acessórios** no cômodo **Quarto** (Confiança: 93%).',
                 },
               ];
 
@@ -234,10 +249,10 @@ export default function CameraTab() {
                 pathname: '/result/entry',
                 params: {
                   identified: 'true',
-                  objectName: 'Carregador Tipo C',
+                  objectName: 'Carregador Tipo C [demo]',
                   habitatName: 'Organizador de Cabos (Escritório)',
                   reasoning:
-                    'Item identificado via busca semântica em cache local síncrono offline.',
+                    'Item identificado via busca semântica em cache local síncrono offline. [demo]',
                   photoUri: photo.uri,
                   compressedUri: compressionResult.uri,
                 },
@@ -267,10 +282,10 @@ export default function CameraTab() {
                   pathname: '/result/entry',
                   params: {
                     identified: 'true',
-                    objectName: 'Carregador Tipo C',
+                    objectName: 'Carregador Tipo C [demo]',
                     habitatName: 'Organizador de Cabos (Escritório)',
                     reasoning:
-                      'Não foi possível contatar o servidor de IA. Utilizando busca analítica local.',
+                      'Não foi possível contatar o servidor de IA. Utilizando busca analítica local. [demo]',
                     photoUri: photo.uri,
                     compressedUri: compressionResult.uri,
                   },
@@ -287,13 +302,27 @@ export default function CameraTab() {
   };
 
   const handleConfirmHabitat = () => {
-    addMessage('USER', 'Sim, confirmar esse destino!');
+    addMessage('USER', 'Sim, confirmar!');
     setLoading(true);
+
+    if (recommendedHabitat?.name === 'Novo Habitat') {
+      setTimeout(() => {
+        const objName = visualSearchMutation.data?.objectName || 'treco';
+        addMessage(
+          'AI',
+          `🤖 Excelente! Confirmado que é um **"${objName}"**.\n\nPara finalizar o cadastro, por favor digite o nome do habitat (local) onde você deseja guardar este treco:`,
+        );
+        setChatContext('HABITAT');
+        nextStep('CONFIRMING');
+        setLoading(false);
+      }, 1000);
+      return;
+    }
 
     setTimeout(() => {
       addMessage(
         'AI',
-        '⚡ Excelente escolha! O treco foi cadastrado com sucesso e já está integrado à sua Pokédex de trecos.\n\nSempre que precisar encontrar, basta buscar por "Carregador" ou olhar na aba principal!',
+        '⚡ Excelente escolha! O treco foi cadastrado com sucesso e já está integrado à sua Pokédex de trecos.\n\nSempre que precisar encontrar, basta buscar por esse nome ou olhar na aba principal!',
       );
       nextStep('FINISHED');
       setLoading(false);
@@ -301,6 +330,19 @@ export default function CameraTab() {
   };
 
   const handleCustomHabitat = () => {
+    if (recommendedHabitat?.name === 'Novo Habitat') {
+      addMessage('USER', 'Não, outra coisa');
+      setChatContext('OBJECT_NAME');
+      nextStep('CONFIRMING');
+      setTimeout(() => {
+        addMessage(
+          'AI',
+          '🤖 Sem problemas! Por favor, digite o nome correto/real deste treco para que eu possa cadastrá-lo:',
+        );
+      }, 500);
+      return;
+    }
+
     addMessage('USER', 'Quero registrar em outro lugar...');
     nextStep('CONFIRMING');
     addMessage(
@@ -316,6 +358,21 @@ export default function CameraTab() {
     addMessage('USER', userText);
     setChatInput('');
     setLoading(true);
+
+    if (chatContext === 'OBJECT_NAME') {
+      setTimeout(() => {
+        if (visualSearchMutation.data) {
+          visualSearchMutation.data.objectName = userText;
+        }
+        addMessage(
+          'AI',
+          `🤖 Perfeito! Registrado como **"${userText}"**.\n\nAgora, digite o nome do habitat (local) onde você deseja guardar este treco:`,
+        );
+        setChatContext('HABITAT');
+        setLoading(false);
+      }, 1000);
+      return;
+    }
 
     setTimeout(() => {
       addMessage(
@@ -443,7 +500,11 @@ export default function CameraTab() {
                   onPress={handleConfirmHabitat}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.confirmBtnText}>SIM, CONFIRMAR DESTINO</Text>
+                  <Text style={styles.confirmBtnText}>
+                    {recommendedHabitat?.name === 'Novo Habitat'
+                      ? `SIM, É UM ${visualSearchMutation.data?.objectName?.toUpperCase() || 'TRECO'}`
+                      : 'SIM, CONFIRMAR DESTINO'}
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -451,7 +512,11 @@ export default function CameraTab() {
                   onPress={handleCustomHabitat}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.declineBtnText}>OUTRO LUGAR</Text>
+                  <Text style={styles.declineBtnText}>
+                    {recommendedHabitat?.name === 'Novo Habitat'
+                      ? 'NÃO, OUTRA COISA'
+                      : 'OUTRO LUGAR'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}

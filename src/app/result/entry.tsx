@@ -13,6 +13,7 @@ export default function VisualSearchResultEntry() {
     reasoning: string;
     photoUri: string;
     compressedUri: string;
+    sessionId?: string;
   }>();
 
   const { startOnboarding } = useChatOnboarding();
@@ -23,6 +24,14 @@ export default function VisualSearchResultEntry() {
     // Requisito T030: Disparar onboarding conversacional se o objeto for inédito
     if (params.photoUri && params.compressedUri) {
       startOnboarding(params.photoUri, params.compressedUri);
+      
+      const { setSessionData } = useChatOnboarding.getState();
+      if (params.sessionId) {
+         setSessionData(params.sessionId, params.objectName, 'AWAITING_PHOTO_CONFIRMATION');
+         const { addMessage } = useChatOnboarding.getState();
+         addMessage('AI', params.reasoning || `Não encontrei esse ser no meu catálogo. Isso é um ${params.objectName}?`);
+      }
+      
       router.replace('/(tabs)/camera');
     } else {
       router.replace('/(tabs)/camera');

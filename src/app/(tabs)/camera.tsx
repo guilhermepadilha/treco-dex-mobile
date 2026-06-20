@@ -17,6 +17,7 @@ import { useChatOnboarding } from '../../store/useChatOnboarding';
 import { compressImage } from '../../utils/media';
 import { ChatList } from '../../components/chat/ChatList';
 import { useVisualSearch } from '../../services/queries/useVisualSearch';
+import { useChatOnboardingMutation } from '../../services/queries/useChatOnboardingApi';
 import { useAuthStore } from '../../store/useAuthStore';
 
 export default function CameraTab() {
@@ -41,14 +42,15 @@ export default function CameraTab() {
     setRecommendedHabitat,
     setLoading,
     nextStep,
+    setSessionData,
     resetOnboarding,
   } = useChatOnboarding();
 
   // Hook da API de Busca Visual
   const visualSearchMutation = useVisualSearch();
+  const chatMutation = useChatOnboardingMutation();
   const { isOffline } = useAuthStore();
   const [chatInput, setChatInput] = useState('');
-  const [chatContext, setChatContext] = useState<'OBJECT_NAME' | 'HABITAT'>('HABITAT');
 
   if (!permission) {
     return (
@@ -140,8 +142,12 @@ export default function CameraTab() {
                       description: 'Defina o local de armazenamento deste novo treco.',
                       confidence: 1.0,
                     });
-                    addMessage('AI', `🤖 ${data.message || `Não encontrei esse ser no meu catálogo. Isso é um ${data.objectName}?`}\n\nDeseja confirmar?`);
-                    nextStep('RECOMMENDATION_SHOWN');
+                    addMessage('AI', `${data.message || `Não encontrei esse ser no meu catálogo. Isso é um ${data.objectName}?`}`);
+                    if (data.sessionId) {
+                      setSessionData(data.sessionId, data.objectName, 'AWAITING_PHOTO_CONFIRMATION');
+                    } else {
+                      nextStep('RECOMMENDATION_SHOWN');
+                    }
                     setLoading(false);
                   } else {
                     // Fallback dinâmico se a IA não identificou com precisão (ou se retornou o escorredor demo)
@@ -269,9 +275,10 @@ export default function CameraTab() {
                     identified: String(data.identified),
                     objectName: data.objectName,
                     habitatName: data.habitatName,
-                    reasoning: data.reasoning,
+                    reasoning: data.message || data.reasoning,
                     photoUri: photo.uri,
                     compressedUri: compressionResult.uri,
+                    sessionId: data.sessionId,
                   },
                 });
               },
@@ -301,21 +308,31 @@ export default function CameraTab() {
     }
   };
 
+  const { sessionId } = useChatOnboarding.getState();
+
   const handleConfirmHabitat = () => {
     addMessage('USER', 'Sim, confirmar!');
     setLoading(true);
 
     if (recommendedHabitat?.name === 'Novo Habitat') {
-      setTimeout(() => {
-        const objName = visualSearchMutation.data?.objectName || 'treco';
-        addMessage(
-          'AI',
-          `🤖 Excelente! Confirmado que é um **"${objName}"**.\n\nPara finalizar o cadastro, por favor digite o nome do habitat (local) onde você deseja guardar este treco:`,
-        );
-        setChatContext('HABITAT');
-        nextStep('CONFIRMING');
-        setLoading(false);
-      }, 1000);
+      // Backend: we send "Não, outra coisa" to tell AI it's NOT the suggested object,
+      // but wait, recommendedHabitat is for visual search demo fallback.
+      // We will keep the legacy UI for SEARCH but if it's ONBOARDING we shouldn't hit this.
+      addMessage('USER', 'Sim, é isso mesmo.');
+      chatMutation.mutate(
+        { sessionId: sessionId!, message: 'Sim, é isso mesmo.' },
+        {
+          onSuccess: (data) => {
+            addMessage('AI', data.reply);
+            nextStep(data.step);
+            setLoading(false);
+          },
+          onError: () => {
+            addMessage('AI', 'Ops, falha ao conectar com o servidor.');
+            setLoading(false);
+          }
+        }
+      );
       return;
     }
 
@@ -330,25 +347,32 @@ export default function CameraTab() {
   };
 
   const handleCustomHabitat = () => {
-    if (recommendedHabitat?.name === 'Novo Habitat') {
-      addMessage('USER', 'Não, outra coisa');
-      setChatContext('OBJECT_NAME');
-      nextStep('CONFIRMING');
-      setTimeout(() => {
-        addMessage(
-          'AI',
-          '🤖 Sem problemas! Por favor, digite o nome correto/real deste treco para que eu possa cadastrá-lo:',
-        );
-      }, 500);
-      return;
-    }
-
     addMessage('USER', 'Quero registrar em outro lugar...');
-    nextStep('CONFIRMING');
-    addMessage(
-      'AI',
-      'Entendido! Por favor, digite o nome do novo habitat onde deseja guardar este treco:',
-    );
+    setLoading(true);
+
+    if (sessionId) {
+      chatMutation.mutate(
+        { sessionId, message: 'Não é esse objeto, é outra coisa.' },
+        {
+          onSuccess: (data) => {
+            addMessage('AI', data.reply);
+            nextStep(data.step);
+            setLoading(false);
+          },
+          onError: () => {
+            addMessage('AI', 'Ops, falha ao conectar com o servidor.');
+            setLoading(false);
+          }
+        }
+      );
+    } else {
+      nextStep('CONFIRMING');
+      addMessage(
+        'AI',
+        'Entendido! Por favor, digite o nome do novo habitat onde deseja guardar este treco:',
+      );
+      setLoading(false);
+    }
   };
 
   const handleSendChatText = () => {
@@ -359,21 +383,29 @@ export default function CameraTab() {
     setChatInput('');
     setLoading(true);
 
-    if (chatContext === 'OBJECT_NAME') {
-      setTimeout(() => {
-        if (visualSearchMutation.data) {
-          visualSearchMutation.data.objectName = userText;
+    if (sessionId) {
+      chatMutation.mutate(
+        { sessionId, message: userText },
+        {
+          onSuccess: (data) => {
+            addMessage('AI', data.reply);
+            if (data.completed) {
+              nextStep('FINISHED');
+            } else {
+              nextStep(data.step);
+            }
+            setLoading(false);
+          },
+          onError: () => {
+            addMessage('AI', 'Desculpe, não consegui processar. Tente novamente.');
+            setLoading(false);
+          }
         }
-        addMessage(
-          'AI',
-          `🤖 Perfeito! Registrado como **"${userText}"**.\n\nAgora, digite o nome do habitat (local) onde você deseja guardar este treco:`,
-        );
-        setChatContext('HABITAT');
-        setLoading(false);
-      }, 1000);
+      );
       return;
     }
 
+    // Fallback if no sessionId
     setTimeout(() => {
       addMessage(
         'AI',
@@ -521,7 +553,7 @@ export default function CameraTab() {
               </View>
             )}
 
-            {currentStep === 'CONFIRMING' && (
+            {['CONFIRMING', 'AWAITING_PHOTO_CONFIRMATION', 'AWAITING_HABITAT'].includes(currentStep) && (
               <View style={styles.inputRow}>
                 <TextInput
                   style={styles.chatInput}

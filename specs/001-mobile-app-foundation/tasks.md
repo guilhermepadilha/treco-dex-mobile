@@ -174,3 +174,17 @@ Task: "Create the register screen wireframe layout in /src/app/(auth)/register.t
 3. Complete Phase 3: User Story 1
 4. **STOP and VALIDATE**: Test User Story 1 independently
 5. Deploy/demo if ready
+
+---
+
+## Integration Loose Ends (Conversational Onboarding API Integration)
+
+As identified in the validation, the mobile app conversational onboarding chat currently relies on client-side mocks and questionnaire wizards rather than connecting with the backend conversational agent. Here are the specific integration tasks to fix these loose ends:
+
+- [x] **T034** Align the Zustand store states (`src/store/useChatOnboarding.ts`) with the API contract session steps (`AWAITING_PHOTO_CONFIRMATION`, `AWAITING_HABITAT`, and a finish flag).
+- [x] **T035** Create API client integration hook/mutation for `/api/objects/chat-onboarding` inside `src/services/queries/` or `src/services/api.ts`.
+- [x] **T036** Replace the client-side mock logic in `handleSendChatText` within `src/app/(tabs)/camera.tsx` with a mutation call to `POST /api/objects/chat-onboarding` to allow natural language parsing.
+- [x] **T037** Ensure the fallback onboarding trigger in `src/app/result/entry.tsx` passes the backend's initialized `sessionId` down to the chat onboarding context.
+- [x] **T038** Handle the completion response (`completed: true`) from the backend in the mobile chat screen to terminate the flow and refresh the main catalog view.
+- [x] **T039** Fix TypeScript type error in Zustand store (`src/store/useChatOnboarding.ts`) by adding `'CONFIRMING'` to the `currentStep` union type.
+- [x] **T040** Remove duplicate `setLoading` destructuring from `useChatOnboarding()` in `src/app/(tabs)/camera.tsx`.

@@ -23,7 +23,9 @@ interface ChatOnboardingState {
   isStarted: boolean;
   isLoading: boolean;
   recommendedHabitat: HabitatRecommendation | null;
-  currentStep: 'PHOTO_TAKEN' | 'RECOMMENDATION_SHOWN' | 'CONFIRMING' | 'FINISHED';
+  sessionId: string | null;
+  objectName: string | null;
+  currentStep: 'PHOTO_TAKEN' | 'RECOMMENDATION_SHOWN' | 'AWAITING_PHOTO_CONFIRMATION' | 'AWAITING_HABITAT' | 'CONFIRMING' | 'COMPLETED' | 'FINISHED';
 
   // Ações
   startOnboarding: (photoUri: string, compressedUri: string) => void;
@@ -31,6 +33,7 @@ interface ChatOnboardingState {
   setRecommendedHabitat: (rec: HabitatRecommendation | null) => void;
   setLoading: (loading: boolean) => void;
   nextStep: (step: ChatOnboardingState['currentStep']) => void;
+  setSessionData: (sessionId: string, objectName: string, step: ChatOnboardingState['currentStep']) => void;
   resetOnboarding: () => void;
 }
 
@@ -42,6 +45,8 @@ export const useChatOnboarding = create<ChatOnboardingState>((set) => ({
   messages: [],
   photoUri: null,
   compressedPhotoUri: null,
+  sessionId: null,
+  objectName: null,
   isStarted: false,
   isLoading: false,
   recommendedHabitat: null,
@@ -62,6 +67,8 @@ export const useChatOnboarding = create<ChatOnboardingState>((set) => ({
       messages: [welcomeMsg],
       currentStep: 'PHOTO_TAKEN',
       recommendedHabitat: null,
+      sessionId: null,
+      objectName: null,
     });
   },
 
@@ -90,6 +97,10 @@ export const useChatOnboarding = create<ChatOnboardingState>((set) => ({
     set({ currentStep: step });
   },
 
+  setSessionData: (sessionId, objectName, step) => {
+    set({ sessionId, objectName, currentStep: step });
+  },
+
   resetOnboarding: () => {
     set({
       messages: [],
@@ -98,6 +109,8 @@ export const useChatOnboarding = create<ChatOnboardingState>((set) => ({
       isStarted: false,
       isLoading: false,
       recommendedHabitat: null,
+      sessionId: null,
+      objectName: null,
       currentStep: 'PHOTO_TAKEN',
     });
   },
